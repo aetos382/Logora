@@ -194,6 +194,28 @@ Codespaces が渡すトークンでは触れないため、エージェントか
 issue が数十件に増えて Milestone だけでは把握できなくなったときや、
 複数リポジトリに跨るようになったときは改めて検討する。ボードは後から作っても損はない。
 
+## 設定の置き場所
+
+**GitHub がリポジトリ内のファイルを読んで効かせるものはファイルで持つ。
+GitHub 側に保存される設定は GitHub を正とし、リポジトリには理由だけを残す。**
+
+| | 例 | 扱い |
+| --- | --- | --- |
+| ファイルが機構そのもの | ワークフロー、issue テンプレート、`.editorconfig`、devcontainer、AGENTS.md | リポジトリを正とする |
+| GitHub 側に保存される | ruleset、ラベル、Milestone、Security の設定 | GitHub を正とし、理由をドキュメントに残す |
+
+後者の値をリポジトリに写しても、GitHub は読まない。効かないファイルは検査が無ければ腐る。
+実際に `main` の ruleset の定義を JSON で持っていたが、適用した直後に実態とずれたため捨てた。
+照合を CI で行うなら admin 権限を持つトークンをワークフローに置くことになり、
+対象も ruleset だけでは済まない。1 人のリポジトリでは代償が大きすぎる。
+
+**理由の側は必ず残す。** 値は `gh ruleset view` のような読み取り専用のコマンドで後から引けるが、
+「なぜ approve を必須にしないのか」は引けない。消えると同じ議論をやり直すことになる。
+
+同じ理由から、**後者に属する設定の写しを `.github/` に置かない。**
+あの配下は `workflows/` や `dependabot.yml` のように置くだけで効くものが集まる場所であり、
+効かないファイルを混ぜると適用済みだと誤解される。
+
 ## 役割分担
 
 | 担当 | 役割 |
@@ -253,36 +275,41 @@ Copilot の一次レビューと基準を揃え、同じ指摘が二重に出る
 ### main の保護
 
 上のルールは書いてあるだけでは守られる保証がないため、ruleset で機械的に強制する。
-定義は [eng/rulesets/main.json](../../eng/rulesets/main.json) に置いてある。
-Web UI だけで設定すると内容がどこにも残らず clone し直しても復元できないため、JSON をリポジトリで持つ。
-
-**`.github/` には置かない。** あの配下は `workflows/` や `dependabot.yml` のように
-置くだけで効くものが集まる場所で、効かないファイルを混ぜると適用済みだと誤解される。
-ruleset をリポジトリ内のファイルから読み込む仕組みは GitHub にない。
-
-内容は次のとおり。
-
-- 直接 push を禁止する（PR 経由のみ）。
-- force push と削除を禁止する。
-- CI の成功を必須にする。
-- **approve は必須にしない。** コラボレーターが 1 人であり、自分の PR は自分で approve できず、
-  Copilot のレビューは approve に数えられない。必須にするとすべての PR がマージ不能になる。
-- bypass する者を置かない。緊急時はルールの `enforcement` を一時的に `disabled` にする。
-
-適用は人間が行う。`gh ruleset` は読み取り専用で、作成には `gh api` が必要だが、
-`gh api` はエージェントに対して [.claude/settings.json](../../.claude/settings.json) で禁止しているため。
+**設定の正は GitHub 側にあり、リポジトリは値の写しを持たない**（「設定の置き場所」を参照）。
+現在の値は次のコマンドで読める。`gh ruleset` は読み取り専用なのでエージェントからも確認できる。
 
 ```sh
-gh api --method POST repos/aetos382/Logora/rulesets --input eng/rulesets/main.json
+gh ruleset list
+gh ruleset view <id>
+gh ruleset check --default   # main に効いている規則だけを見る
 ```
+
+意図は次のとおり。値そのものではなく、なぜその値なのかを残す。
+
+- **直接 push を禁止する。** `main` の更新は PR 経由のみとし、force push と削除も禁じる。
+- **CI（`Build and test`）の成功を必須にする。** ブランチを `main` に追随させてからマージする。
+- **approve は必須にしない（0 件）。** コラボレーターが 1 人であり、自分の PR は自分で approve できず、
+  Copilot のレビューは approve に数えられない。必須にするとすべての PR がマージ不能になる。
+- **Copilot のレビューを ruleset で必須にする。** 上の「マージ前の条件」の 2 番目がこれで強制される。
+  push のたびに再レビューが走る。
+- **マージ方法はマージ コミットのみとし、線形履歴は要求しない。** squash にすると 1 PR が 1 コミットに潰れ、
+  コミット メッセージに書いた個々の判断の理由が失われる。履歴はグラフになるが、
+  `git log --first-parent` を使えば PR 単位の一直線としても読める。
+- **署名を必須にする。** Web UI と `gh pr merge` 経由のマージ コミットは GitHub が署名するので通る。
+  ローカルから `main` へ push する道は、直接 push の禁止によって元から閉じている。
+- **bypass する者を置かない。** 緊急時はルールの `enforcement` を一時的に `disabled` にする。
+- **`code_scanning` は現在外している。** C# のコードが 1 行も無く、CodeQL が解析対象を見つけられないため。
+  戻す条件は [#12](https://github.com/aetos382/Logora/issues/12) にある。
+
+適用と変更は人間が行う。作成・更新には `gh api` が必要で、これはエージェントに対して
+[.claude/settings.json](../../.claude/settings.json) で禁止しているため。
 
 **この操作を `eng/*.sh` のスクリプトにしない。** スクリプトにすると、エージェントが
 `bash eng/...` 経由で `gh api` を実行できてしまい、deny が意味を失う。
 
-**CI が一度も走っていない状態で適用しない。** `required_status_checks` に挙げた名前の
-チェックが存在しないと、PR が永久に pending のままマージできなくなる。
-先に PR を 1 つ作って CI を走らせ、チェック名が
-[ci.yml](../../.github/workflows/ci.yml) のジョブ名と一致していることを確かめてから適用する。
+**新しいチェックを必須にするときは、先に 1 回緑になるのを見てから行う。**
+`required_status_checks` に挙げた名前のチェックが存在しないと、PR が永久に pending のまま
+マージできなくなる。チェック名は [ci.yml](../../.github/workflows/ci.yml) のジョブ名である。
 
 ## CI
 
