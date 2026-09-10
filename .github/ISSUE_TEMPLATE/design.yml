@@ -1,0 +1,55 @@
+name: 設計判断（ADR 候補）
+description: 実装より先に決めるべき設計上の論点。合意できたら ADR に落とす。
+labels:
+  - "kind:design"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ここで議論し、結論を ADR として PR で追加する。手順は [進め方](../blob/main/docs/design/process.md) にある。
+        局所的で後から自由に変えられる判断は ADR にしない。コード中のコメントで足りる。
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 決めたいこと
+      description: 何を決める必要があるのか。決めないと何が進まないのか。
+    validations:
+      required: true
+
+  - type: textarea
+    id: options
+    attributes:
+      label: 候補
+      description: 考えられる案を列挙する。この時点で優劣を断定しなくてよい。
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: constraints
+    attributes:
+      label: 制約・前提
+      description: 既存の ADR、外部ライブラリの都合、配布形態（dotnet tool）などの縛り。
+    validations:
+      required: false
+
+  - type: input
+    id: affected-adr
+    attributes:
+      label: 影響を受ける ADR
+      description: この判断で置き換わる、または補足される既存の ADR があれば書く。
+      placeholder: "ADR-0004"
+    validations:
+      required: false
+
+  - type: textarea
+    id: research
+    attributes:
+      label: 調査が必要なこと
+      description: 判断の前に調べる必要があること。外部ライブラリの比較などは調査日を残す。
+    validations:
+      required: false

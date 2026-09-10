@@ -2,6 +2,14 @@
 
 最終更新: 2026-09-10
 
+## このドキュメントの位置づけ
+
+これは [ADR](adr/README.md) の要約ビューである。設計判断の正は ADR にあり、
+このドキュメントと ADR が矛盾した場合は ADR が正しい。
+
+ADR を追加・変更したときは、このドキュメントも追随させる。
+ここに ADR のない新しい決定を書かない。進め方は [進め方](process.md) にある。
+
 ## 目的
 
 Markdown と AsciiDoc を入力とし、静的なサイトを生成する汎用のジェネレーターを C# で作る。
@@ -24,7 +32,7 @@ Markdown と AsciiDoc を入力とし、静的なサイトを生成する汎用�
 
 | プロジェクト | 役割 |
 | --- | --- |
-| `Logora.Abstractions` | `IContentParser` / `ITemplateEngine` / `IOutputWriter` とドキュメント AST の契約のみ。実装への依存を持たない。 |
+| `Logora.Abstractions` | `IContentParser` / `ITemplateEngine` / `IOutputWriter` とドキュメント AST の契約のみ。外部依存は[許可リスト](abstractions-dependencies.md)にあるものだけ（現時点では空）。 |
 | `Logora.Core` | AST 実装、パイプライン、サイト モデル、増分ビルド |
 | `Logora.Parsers.Markdig` | Markdig を AST へマップ |
 | `Logora.Parsers.NAsciidoc` | NAsciidoc.Core を AST へマップ |
@@ -34,6 +42,11 @@ Markdown と AsciiDoc を入力とし、静的なサイトを生成する汎用�
 
 プロジェクト名の第 2 セグメントは差し替え軸（`Parsers` / `Templates`）、第 3 セグメントは採用した実装ライブラリ名とする。
 入力形式名（`Markdown` など）を使わないのは、同一形式に複数の実装が並び得るため（[ADR-0003](adr/0003-pluggable-components.md)）。
+
+`Logora.Abstractions` の外部依存は許可制とし、許可したものを
+[abstractions-dependencies.md](abstractions-dependencies.md) に列挙する
+（[ADR-0006](adr/0006-abstractions-dependencies.md)）。現時点では空である。
+追加には issue が必要で、依存の型が公開シグネチャに現れる場合は ADR も必要になる。
 
 ## パイプライン
 
@@ -60,6 +73,21 @@ Discover → Parse → Transform → Model → Render → Emit
    表現できない構造は `UnknownNode` として原文とともに残す。
 3. **合格条件**: 目次生成と相互参照解決という同一の AST 変換が、Markdown と AsciiDoc の双方で同じ結果を返すことをテストで担保する。
    これを M3 の受け入れ条件とする。
+
+## 診断
+
+パース警告、AST で表現できなかった構造、相互参照の解決失敗などは、
+**ビルド結果を構成するデータとして表現し、`ILogger` には流さない**
+（[ADR-0007](adr/0007-diagnostics-as-data.md)）。
+
+- `Logora.Abstractions` に `Diagnostic`（ID・重大度・位置）と `IDiagnosticSink` を置く。
+- プラグインは呼び出しごとのコンテキストで受け取ったシンクへ報告する。戻り値には診断を含めない。
+  シンクをコンストラクターで受け取って保持しない。
+- 集合を持つのは `Logora.Core`。重複排除・ソート・打ち切り・ビルド失敗の判定はすべて Core 側にある。
+- 診断の件数と内容はログの出力設定から独立している。
+  CLI の標準出力・`serve` の画面・将来の IDE 連携は同じ集合を読む。
+
+診断 ID の体系とメッセージのローカライズはまだ決まっていない。
 
 ## マイルストーン
 

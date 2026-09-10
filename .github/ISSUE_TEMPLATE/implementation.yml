@@ -1,0 +1,75 @@
+name: 実装タスク
+description: ADR に従って実装する作業。1 つの PR で閉じられる粒度で立てる。
+labels:
+  - "kind:feat"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        この issue は AI エージェントに渡すことがある。
+        エージェントは [AGENTS.md](../blob/main/AGENTS.md) と、下に書かれた関連 ADR に従って実装する。
+        設計判断がまだ決まっていない場合は、この issue ではなく「設計判断（ADR 候補）」を先に立てる。
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 目的
+      description: 何を実現するのか。なぜ今これが必要なのか。
+    validations:
+      required: true
+
+  - type: input
+    id: adr
+    attributes:
+      label: 関連 ADR
+      description: この作業が従う ADR。複数ある場合は列挙する。該当がないなら、まず設計判断の issue を立てるべきか考える。
+      placeholder: "ADR-0002, ADR-0003"
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 受け入れ条件
+      description: 何が動けば完了か。可能なら「このテストが通る」という形で書く。
+      placeholder: |
+        - [ ] Markdown の見出しから Section ノードが構築される
+        - [ ] 見出し ID の付与が Markdown と AsciiDoc で同じ結果になるテストが通る
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 対象領域
+      options:
+        - abstractions
+        - core
+        - parsers
+        - templates
+        - cli
+        - docs
+        - build
+    validations:
+      required: true
+
+  - type: dropdown
+    id: agent
+    attributes:
+      label: 担当
+      description: |
+        Copilot に渡せるのは、受け入れ条件が機械的に検証でき、範囲が狭く、新しい設計判断を含まないものだけ。
+      options:
+        - claude
+        - copilot
+        - human
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 補足
+      description: 触ってほしくない範囲、依存する他の issue、参考リンクなど。
+    validations:
+      required: false

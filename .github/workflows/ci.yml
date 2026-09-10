@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # GitHub Actions sets the CI variable, which turns on ContinuousIntegrationBuild
+      # in Directory.Build.props, so restore runs with RestoreLockedMode.
+      # An out-of-date packages.lock.json fails here.
+      - name: Restore
+        run: dotnet restore Logora.slnx
+
+      - name: Build
+        run: bash eng/build.sh --no-restore
+
+      - name: Test
+        run: bash eng/test.sh --no-build
+
+      # Warnings must not fail the build, so only count them and write the totals
+      # to the job summary.
+      - name: Summarize warnings
+        if: always()
+        run: bash eng/summarize-warnings.sh
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-logs
+          path: artifacts/log/
+          if-no-files-found: ignore

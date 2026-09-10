@@ -1,0 +1,55 @@
+name: バグ報告
+description: 期待どおりに動かない箇所の報告。
+labels:
+  - "kind:fix"
+body:
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 現象
+      description: 何が起きているか。エラー メッセージがあれば貼る。
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 再現手順
+      description: 最小の手順を書く。入力ファイルの内容が関係する場合は、その中身も貼る。
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待する挙動
+      description: どうなるべきか。ADR や設計ドキュメントに根拠があれば示す。
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 対象領域
+      options:
+        - abstractions
+        - core
+        - parsers
+        - templates
+        - cli
+        - docs
+        - build
+        - 不明
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 環境
+      description: OS、`dotnet --version` の出力、Codespaces かローカルか。
+    validations:
+      required: false
