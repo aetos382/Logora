@@ -110,6 +110,8 @@ SDK は [global.json](global.json) で固定している（.NET 10）。テス�
 ## Git
 
 - `main` に直接コミットしない。1 issue = 1 ブランチとし、1 つのブランチを複数のエージェントで触らない。
+- まとめて対応したい場合も、1 PR に複数の issue を詰めない。issue の側を統合してから 1 つの PR を出す。
+  手順は [docs/design/process.md](docs/design/process.md)。
 - ブランチ名は `<kind>/<issue 番号>-<短い英語スラッグ>`（例: `feat/12-markdig-mapping`）。
 - 改行は LF。[.gitattributes](.gitattributes) で強制している。
 - `git config --list` や `git config --get` は使わない。`git config list` と `git config get` を使う。
