@@ -10,6 +10,7 @@
 | [0003](0003-pluggable-components.md) | パーサーとテンプレート エンジンを差し替え可能にする | 採用 | 2026-09-10 |
 | [0004](0004-asciidoc-parser.md) | AsciiDoc は NAsciidoc.Core 経由で AST にマップする | 採用 | 2026-09-10 |
 | [0005](0005-razor-templates.md) | Razor テンプレートは HtmlRenderer で実装する | 採用 | 2026-09-10 |
+| [0006](0006-abstractions-dependencies.md) | `Logora.Abstractions` の外部依存を許可制にする | 採用 | 2026-09-10 |
 
 新しい ADR を追加するときは、この表にも 1 行足す。
 

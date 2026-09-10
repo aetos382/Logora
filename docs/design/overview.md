@@ -32,7 +32,7 @@ Markdown と AsciiDoc を入力とし、静的なサイトを生成する汎用�
 
 | プロジェクト | 役割 |
 | --- | --- |
-| `Logora.Abstractions` | `IContentParser` / `ITemplateEngine` / `IOutputWriter` とドキュメント AST の契約のみ。実装への依存を持たない。 |
+| `Logora.Abstractions` | `IContentParser` / `ITemplateEngine` / `IOutputWriter` とドキュメント AST の契約のみ。外部依存は[許可リスト](abstractions-dependencies.md)にあるものだけ（現時点では空）。 |
 | `Logora.Core` | AST 実装、パイプライン、サイト モデル、増分ビルド |
 | `Logora.Parsers.Markdig` | Markdig を AST へマップ |
 | `Logora.Parsers.NAsciidoc` | NAsciidoc.Core を AST へマップ |
@@ -42,6 +42,11 @@ Markdown と AsciiDoc を入力とし、静的なサイトを生成する汎用�
 
 プロジェクト名の第 2 セグメントは差し替え軸（`Parsers` / `Templates`）、第 3 セグメントは採用した実装ライブラリ名とする。
 入力形式名（`Markdown` など）を使わないのは、同一形式に複数の実装が並び得るため（[ADR-0003](adr/0003-pluggable-components.md)）。
+
+`Logora.Abstractions` の外部依存は許可制とし、許可したものを
+[abstractions-dependencies.md](abstractions-dependencies.md) に列挙する
+（[ADR-0006](adr/0006-abstractions-dependencies.md)）。現時点では空である。
+追加には issue が必要で、依存の型が公開シグネチャに現れる場合は ADR も必要になる。
 
 ## パイプライン
 

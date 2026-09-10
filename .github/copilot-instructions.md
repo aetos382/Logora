@@ -26,7 +26,7 @@
 上から優先順。
 
 1. **ADR 違反。** 特に次の 3 つ。
-   - `Logora.Abstractions` への実装ライブラリ依存の混入（[ADR-0003](../docs/design/adr/0003-pluggable-components.md)）
+   - `Logora.Abstractions` への、[許可リスト](../docs/design/abstractions-dependencies.md)に無い依存の混入（[ADR-0006](../docs/design/adr/0006-abstractions-dependencies.md)）
    - HTML 生成が Parse 段階に漏れ出していること（[ADR-0002](../docs/design/adr/0002-document-ast.md)）
    - 1 つの入力形式のためだけの AST ノード追加（[ADR-0002](../docs/design/adr/0002-document-ast.md)）
 2. **誤り。** null 許容性の破り、例外の握り潰し、`CancellationToken` の未伝播、非同期の同期待ち、

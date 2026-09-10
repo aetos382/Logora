@@ -25,8 +25,12 @@ Markdown と AsciiDoc を入力とし、静的サイトを生成する汎用ジ�
 - AST ノードは「Markdown にある要素」ではなく「文書に必要な要素」で定義する（[ADR-0002](docs/design/adr/0002-document-ast.md)）。
   **ノードの追加は「2 つ以上の入力形式で必要であること」を要件とする。** 1 形式のためだけにノードを増やさない。
 - パーサー固有の情報は任意の key/value を持つ `Attributes` に保持し、表現できない構造は `UnknownNode` として原文とともに残す。情報を捨てない。
-- `Logora.Abstractions` は実装ライブラリへの依存を一切持たない（[ADR-0003](docs/design/adr/0003-pluggable-components.md)）。
+- `Logora.Abstractions` は外部依存を極力持たない（[ADR-0006](docs/design/adr/0006-abstractions-dependencies.md)）。
+  依存してよいパッケージは [abstractions-dependencies.md](docs/design/abstractions-dependencies.md) に
+  列挙されたものだけで、**現時点では空**。
   Markdig や Scriban の型を、公開シグネチャにも `PackageReference` にも持ち込まない。
+  「これは抽象パッケージだから良いはず」と自分で判断しない。追加には issue が必要で、
+  公開シグネチャに型が現れる場合は ADR も必要になる。
 - プロジェクト名は `Logora.<差し替え軸>.<実装ライブラリ名>` とする（[ADR-0003](docs/design/adr/0003-pluggable-components.md)）。
   `Logora.Markdown` のような入力形式名は使わない。同一形式に複数の実装が並び得るため。
 - AsciiDoc は NAsciidoc.Core の AST を経由してマップし、その HTML レンダリング機能は使わない（[ADR-0004](docs/design/adr/0004-asciidoc-parser.md)）。
@@ -122,7 +126,7 @@ SDK は [global.json](global.json) で固定している（.NET 10）。テス�
 ## やってはいけないこと
 
 - ADR に反する設計変更を、ADR を更新せずに実装すること。
-- `Logora.Abstractions` に実装ライブラリへの依存を追加すること。
+- `Logora.Abstractions` に、[許可リスト](docs/design/abstractions-dependencies.md)に無いパッケージへの依存を追加すること。
 - 1 つの入力形式のためだけに AST ノードを追加すること。
 - `packages.lock.json` を手で編集すること。
 - 相談なく NuGet パッケージを追加すること。
