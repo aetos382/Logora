@@ -86,15 +86,66 @@ sub-issue の粒度は「1 つの PR で閉じられること」を目安にす�
 
 ### ラベル
 
-3 軸で付ける。
+`area:` / `kind:` / `agent:` の 3 軸で付ける。**それぞれの軸から少なくとも 1 つ付ける。**
+GitHub の既定ラベル（`bug`、`enhancement` など）は削除した。使わない。
 
-| 軸 | 値 |
+`area:` は複数付けてよい。`kind:` と `agent:` は 1 つに絞る。
+`kind:` が 2 つ必要に見えるときは、issue が 2 件分の内容を抱えているので分割する。
+`agent:` を複数付けると誰が持っているのか分からなくなるため、必ず 1 つにする。
+
+#### `area:` — どこを触るか
+
+| ラベル | 対象 |
 | --- | --- |
-| `area:` | `abstractions` / `core` / `parsers` / `templates` / `cli` / `docs` / `build` |
-| `kind:` | `feat` / `fix` / `docs` / `test` / `chore` / `design` |
-| `agent:` | `claude` / `copilot` / `human` |
+| `area:abstractions` | `Logora.Abstractions`。`IContentParser` / `ITemplateEngine` / `IOutputWriter` と AST の契約 |
+| `area:core` | `Logora.Core`。AST の実装、パイプライン、サイト モデル、増分ビルド |
+| `area:parsers` | `Logora.Parsers.*`。入力形式から AST へのマッピング |
+| `area:templates` | `Logora.Templates.*`。テンプレート エンジンと Render 段階 |
+| `area:cli` | `Logora.Cli`。`logora new` / `build` / `serve` |
+| `area:docs` | `docs/` 配下のドキュメントと ADR |
+| `area:build` | ビルド構成、`eng/*.sh`、CI、devcontainer などの開発環境 |
 
-`kind:design` は ADR を書く issue に付ける。
+迷いやすいところ。
+
+- 契約と実装を同時に変えるなら `area:abstractions` と `area:core` の両方を付ける。AST ノードの追加は多くの場合これに当たる。
+- コード中の XML ドキュメント コメントは `area:docs` ではない。そのコードが属する area を使う。
+  `area:docs` は `docs/` 配下のファイルを触るときだけ。
+
+#### `kind:` — 何をするか
+
+| ラベル | 用途 |
+| --- | --- |
+| `kind:feat` | 機能の追加。新しい AST ノード、新しいコマンド、新しいオプションなど |
+| `kind:fix` | 不具合の修正。期待どおりに動かないものを直す |
+| `kind:docs` | ドキュメントの変更。ただし ADR の追加には使わない（`kind:design` を使う） |
+| `kind:test` | テストの追加・改善そのものを目的とする作業 |
+| `kind:chore` | 挙動を変えない雑務。依存の更新、設定の変更、CI の調整など |
+| `kind:design` | 設計判断。論点の整理から ADR の追加までを含む |
+
+迷いやすいところ。
+
+- **ADR を追加する issue は `kind:design`。** `kind:docs` ではない。ADR はドキュメントの形をしているが、
+  実体は設計判断であり、決めてからでないと実装に進めないため扱いが違う。
+- 機能追加に付随するテストは `kind:feat` に含まれる。`kind:test` は付けない。
+  `kind:test` を使うのは、既存コードのテストを後から足す場合や、テストの書き方を直す場合。
+- CI の設定を変える作業は `area:build` と `kind:chore` の組み合わせになる。
+  `area:build` は場所、`kind:chore` は作業の性質を表しており、軸が違うので両方付く。
+
+#### `agent:` — 誰が担当するか
+
+| ラベル | 担当 |
+| --- | --- |
+| `agent:claude` | Claude。設計、ADR の起草、AST・コア・パイプラインの実装、込み入ったリファクタリング |
+| `agent:copilot` | GitHub Copilot。下記 3 条件をすべて満たす issue のみ |
+| `agent:human` | 人間。方針の決定、ADR の採否、マイルストーンの親 issue |
+
+`agent:copilot` を付けられるのは次のすべてを満たすものに限る。判断できないときは `agent:claude` にする。
+
+- 受け入れ条件が機械的に検証できる。
+- 触るファイルが少なく、範囲がはっきりしている。
+- 新しい設計判断を含まない。
+
+**マイルストーンの親 issue には `agent:human` を付ける。** 親 issue はエージェントに渡さないため。
 
 ### issue に必ず書くこと
 
@@ -125,13 +176,7 @@ Agent フィールドを置く理由は、どのエージェントが今何を�
 | Claude | 設計、ADR の起草、ドキュメント AST・コア・パイプラインの実装、込み入ったリファクタリング、Copilot のレビュー指摘の裁定 |
 | Copilot | PR の一次レビュー、`agent:copilot` を付けた issue の実装 |
 
-### Copilot に渡す issue の条件
-
-3 つすべてを満たすものに限る。
-
-- 受け入れ条件が機械的に検証できる（テストが通る、警告が消える、など）。
-- 触るファイルが少なく、範囲がはっきりしている。
-- 新しい設計判断を含まない。ADR で決まっていることの適用だけで済む。
+Copilot に渡せる issue の条件は、上の「ラベル」の `agent:` の節にある。
 
 ### 衝突を避ける仕組み
 

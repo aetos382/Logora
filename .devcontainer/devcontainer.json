@@ -3,12 +3,10 @@
   "image": "mcr.microsoft.com/devcontainers/base:bookworm",
 
   "features": {
-    // SDK のバージョンは global.json が要求するものに合わせる。
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "10.0.400"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
-    // Claude Code CLI を npm で入れるために必要。
     "ghcr.io/devcontainers/features/node:1": {
       "version": "lts"
     }
