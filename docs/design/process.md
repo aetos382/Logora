@@ -235,6 +235,40 @@ Copilot の一次レビューと基準を揃え、同じ指摘が二重に出る
   2. Copilot のレビューを受け、指摘に対応または理由を返している。
 - マージは人間が行う。エージェントは自分の PR をマージしない。
 
+### main の保護
+
+上のルールは書いてあるだけでは守られる保証がないため、ruleset で機械的に強制する。
+定義は [eng/rulesets/main.json](../../eng/rulesets/main.json) に置いてある。
+Web UI だけで設定すると内容がどこにも残らず clone し直しても復元できないため、JSON をリポジトリで持つ。
+
+**`.github/` には置かない。** あの配下は `workflows/` や `dependabot.yml` のように
+置くだけで効くものが集まる場所で、効かないファイルを混ぜると適用済みだと誤解される。
+ruleset をリポジトリ内のファイルから読み込む仕組みは GitHub にない。
+
+内容は次のとおり。
+
+- 直接 push を禁止する（PR 経由のみ）。
+- force push と削除を禁止する。
+- CI の成功を必須にする。
+- **approve は必須にしない。** コラボレーターが 1 人であり、自分の PR は自分で approve できず、
+  Copilot のレビューは approve に数えられない。必須にするとすべての PR がマージ不能になる。
+- bypass する者を置かない。緊急時はルールの `enforcement` を一時的に `disabled` にする。
+
+適用は人間が行う。`gh ruleset` は読み取り専用で、作成には `gh api` が必要だが、
+`gh api` はエージェントに対して [.claude/settings.json](../../.claude/settings.json) で禁止しているため。
+
+```sh
+gh api --method POST repos/aetos382/Logora/rulesets --input eng/rulesets/main.json
+```
+
+**この操作を `eng/*.sh` のスクリプトにしない。** スクリプトにすると、エージェントが
+`bash eng/...` 経由で `gh api` を実行できてしまい、deny が意味を失う。
+
+**CI が一度も走っていない状態で適用しない。** `required_status_checks` に挙げた名前の
+チェックが存在しないと、PR が永久に pending のままマージできなくなる。
+先に PR を 1 つ作って CI を走らせ、チェック名が
+[ci.yml](../../.github/workflows/ci.yml) のジョブ名と一致していることを確かめてから適用する。
+
 ## CI
 
 [.github/workflows/ci.yml](../../.github/workflows/ci.yml) で `main` への push と全 PR に対して実行する。

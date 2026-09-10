@@ -64,7 +64,11 @@ Copilot に渡すべき軽い作業（[docs/design/process.md](docs/design/proce
 
 ### どちらでも共通
 
-- GitHub 上のファイルを読むときは GitHub MCP サーバーの `get_file_contents` を使う。`WebFetch` や `gh api` は使わない。
+- **`gh api` は使わない。** 1 つのコマンドで読み取りも書き込みもできるため、権限を一律で許可できない。
+  [.claude/settings.json](.claude/settings.json) で deny している。
+  読み取りは `gh issue view` のような読み取り専用のサブコマンドを使う。
+  それでは届かないもの（ruleset の作成など）は、迂回せずに手順を添えて報告する。
+- GitHub 上のファイルを読むときは GitHub MCP サーバーの `get_file_contents` を使う。`WebFetch` は使わない。
 - issue の検索には `gh search issues` または GitHub MCP サーバーの `search_issues` / `issue_read` を使う。
 - GitHub MCP サーバーや gh CLI が使えなかった場合は、迂回策を探す前に報告する。
 - `jq` / `rg` / coreutils が使える。

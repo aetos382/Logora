@@ -41,7 +41,7 @@ Markdown と AsciiDoc を入力とし、静的サイトを生成する汎用ジ�
 | `sources/` | 製品コード。1 プロジェクト 1 ディレクトリ。 |
 | `tests/` | テスト コード。`<テスト対象プロジェクト名>.Tests` を既定の命名とする。 |
 | `docs/design/` | 設計ドキュメントと ADR |
-| `eng/` | ビルド・テスト用のスクリプト |
+| `eng/` | ビルド・テスト用のスクリプトと、開発環境の設定（`rulesets/` の ruleset 定義など） |
 | `artifacts/` | ビルド出力（`UseArtifactsOutput`）。Git 管理外。`bin` / `obj` を探さない。 |
 
 ## ビルドとテスト
@@ -89,6 +89,9 @@ SDK は [global.json](global.json) で固定している（.NET 10）。テス�
 - 自分のメンバーへのアクセスは `this.` または型名で修飾する（`.globalconfig` が警告として強制する）。
 - 公開 API には XML ドキュメント コメントを日本語で書く（`GenerateDocumentationFile` が有効）。
 - コメントは日本語で書く。「なぜそうしたか」を書き、コードを読めば分かることは書かない。
+- **GitHub Actions のワークフローだけは英語で書く。** ジョブ名とステップ名がステータス チェックの
+  名前として GitHub の UI と API に現れ、[eng/rulesets/main.json](eng/rulesets/main.json) の
+  `required_status_checks` からも参照されるため。コメントも合わせて英語にする。
 - 「例外を投げる」を単に「投げる」と書かない。
 - まだ何も公開していない。互換性を保つための小細工より、今のうちに素直な形に直すことを優先する。
 
