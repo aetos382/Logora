@@ -309,7 +309,7 @@ gh ruleset check --default   # main に効いている規則だけを見る
 
 **新しいチェックを必須にするときは、先に 1 回緑になるのを見てから行う。**
 `required_status_checks` に挙げた名前のチェックが存在しないと、PR が永久に pending のまま
-マージできなくなる。チェック名は [ci.yml](../../.github/workflows/ci.yml) のジョブ名である。
+マージできなくなる。チェック名は PR の Checks に表示される名称（例: `CI / Build and test`）である。
 
 ## CI
 
