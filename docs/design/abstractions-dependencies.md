@@ -42,7 +42,7 @@ ADR に置くと、依存を 1 つ足すたびに ADR を書き換えること�
 
 | パッケージ | 論点 |
 | --- | --- |
-| `Microsoft.Extensions.Logging.Abstractions` | [#7](https://github.com/aetos382/Logora/issues/7) / [#8](https://github.com/aetos382/Logora/issues/8) |
+| `Microsoft.Extensions.Logging.Abstractions` | [#8](https://github.com/aetos382/Logora/issues/8)。診断を流すためには要らない（[ADR-0007](adr/0007-diagnostics-as-data.md)）ので、論点は DI の採否だけである。 |
 | `Microsoft.Extensions.FileProviders.Abstractions`（推移的に `Microsoft.Extensions.Primitives` を含む） | [#9](https://github.com/aetos382/Logora/issues/9) |
 
 ## 検査

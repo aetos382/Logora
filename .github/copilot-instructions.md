@@ -25,10 +25,13 @@
 
 上から優先順。
 
-1. **ADR 違反。** 特に次の 3 つ。
+1. **ADR 違反。** 特に次の 4 つ。
    - `Logora.Abstractions` への、[許可リスト](../docs/design/abstractions-dependencies.md)に無い依存の混入（[ADR-0006](../docs/design/adr/0006-abstractions-dependencies.md)）
    - HTML 生成が Parse 段階に漏れ出していること（[ADR-0002](../docs/design/adr/0002-document-ast.md)）
    - 1 つの入力形式のためだけの AST ノード追加（[ADR-0002](../docs/design/adr/0002-document-ast.md)）
+   - 診断の扱い（[ADR-0007](../docs/design/adr/0007-diagnostics-as-data.md)）。
+     `ILogger` に流している、戻り値に診断を含めている、`IDiagnosticSink` をフィールドに保持している、
+     打ち切りや重複排除をプラグイン側で行っている、のいずれか
 2. **誤り。** null 許容性の破り、例外の握り潰し、`CancellationToken` の未伝播、非同期の同期待ち、
    パーサー固有情報の取りこぼし（`Attributes` / `UnknownNode` に残すべきものを捨てている）。
 3. **テスト。** 新しい分岐にテストがあるか。テスト メソッドの概要コメントが、
