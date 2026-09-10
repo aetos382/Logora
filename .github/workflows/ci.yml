@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+
+jobs:
+  build:
+    name: ビルドとテスト
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: チェックアウト
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: .NET SDK のセットアップ
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # GitHub Actions は CI 環境変数を設定するため、Directory.Build.props により
+      # ContinuousIntegrationBuild が有効になり、復元は RestoreLockedMode で走る。
+      # packages.lock.json の更新漏れはここで失敗する。
+      - name: 復元
+        run: dotnet restore Logora.slnx
+
+      - name: ビルド
+        run: bash eng/build.sh --no-restore
+
+      - name: テスト
+        run: bash eng/test.sh --no-build
+
+      # 警告ではビルドを落とさない方針のため、件数を集計してジョブ サマリに出すだけにする。
+      - name: 警告の集計
+        if: always()
+        run: bash eng/summarize-warnings.sh
+
+      - name: ログの保存
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: build-logs
+          path: artifacts/log/
+          if-no-files-found: ignore
