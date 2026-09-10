@@ -100,16 +100,20 @@ GitHub の既定ラベル（`bug`、`enhancement` など）は削除した。使
 | `area:abstractions` | `Logora.Abstractions`。`IContentParser` / `ITemplateEngine` / `IOutputWriter` と AST の契約 |
 | `area:core` | `Logora.Core`。AST の実装、パイプライン、サイト モデル、増分ビルド |
 | `area:parsers` | `Logora.Parsers.*`。入力形式から AST へのマッピング |
-| `area:templates` | `Logora.Templates.*`。テンプレート エンジンと Render 段階 |
+| `area:templates` | `Logora.Templates.*`。テンプレート エンジン、Render 段階、既定テーマ |
 | `area:cli` | `Logora.Cli`。`logora new` / `build` / `serve` |
 | `area:docs` | `docs/` 配下のドキュメントと ADR |
-| `area:build` | ビルド構成、`eng/*.sh`、CI、devcontainer などの開発環境 |
+| `area:build` | ビルド構成、`eng/*.sh`、CI、devcontainer、開発用のスキルなどの開発環境 |
+| `area:authoring` | 記事執筆を支援するツール。Logora の利用者向けであり、本体の実装ではない |
 
 迷いやすいところ。
 
 - 契約と実装を同時に変えるなら `area:abstractions` と `area:core` の両方を付ける。AST ノードの追加は多くの場合これに当たる。
 - コード中の XML ドキュメント コメントは `area:docs` ではない。そのコードが属する area を使う。
   `area:docs` は `docs/` 配下のファイルを触るときだけ。
+- エージェント向けのスキルやプラグインは、誰のためのものかで分ける。
+  Logora を開発するためのものは `area:build`、Logora で記事を書く人のためのものは `area:authoring`。
+- 既定テーマはテンプレート エンジンそのものではないが `area:templates` に入れる。テーマ専用の area は作らない。
 
 #### `kind:` — 何をするか
 
@@ -120,7 +124,7 @@ GitHub の既定ラベル（`bug`、`enhancement` など）は削除した。使
 | `kind:docs` | ドキュメントの変更。ただし ADR の追加には使わない（`kind:design` を使う） |
 | `kind:test` | テストの追加・改善そのものを目的とする作業 |
 | `kind:chore` | 挙動を変えない雑務。依存の更新、設定の変更、CI の調整など |
-| `kind:design` | 設計判断。論点の整理から ADR の追加までを含む |
+| `kind:design` | 設計判断。論点の整理から ADR の追加までを含む。アーキテクチャの意味であり、見た目のことではない |
 
 迷いやすいところ。
 
@@ -130,6 +134,9 @@ GitHub の既定ラベル（`bug`、`enhancement` など）は削除した。使
   `kind:test` を使うのは、既存コードのテストを後から足す場合や、テストの書き方を直す場合。
 - CI の設定を変える作業は `area:build` と `kind:chore` の組み合わせになる。
   `area:build` は場所、`kind:chore` は作業の性質を表しており、軸が違うので両方付く。
+- **`kind:design` の「デザイン」は設計（アーキテクチャ）の意味。見た目のデザインには使わない。**
+  テーマの外観や CSS を触る作業は `area:templates` + `kind:feat` / `kind:fix` で表す。
+  ただし「既定テーマをどういう形で持つか」のような、後から変えるのが高くつく判断は `kind:design` に当たる。
 
 #### `agent:` — 誰が担当するか
 
@@ -177,6 +184,32 @@ Agent フィールドを置く理由は、どのエージェントが今何を�
 | Copilot | PR の一次レビュー、`agent:copilot` を付けた issue の実装 |
 
 Copilot に渡せる issue の条件は、上の「ラベル」の `agent:` の節にある。
+
+### 工程の分離
+
+**実装したコンテキストが、その実装のレビューを兼ねない。**
+書いた本人は「なぜそう書いたか」を覚えているため、その前提を疑えない。
+レビューは、書かれたコードと ADR と受け入れ条件だけを見る別のコンテキストが行う。
+
+**テストは受け入れ条件から書く。** 実装を見ながら書くと実装した経路のテストになり、
+実装の穴とテストの穴が一致する。テストが通っても仕様を満たしていない、という状態が残る。
+可能なら実装より先に書く。
+
+Claude はこれをサブエージェントで担う。定義は次の 2 つで、リポジトリに入っている。
+
+| 用途 | 定義 |
+| --- | --- |
+| 実装のレビュー | [.claude/agents/implementation-reviewer.md](../../.claude/agents/implementation-reviewer.md) |
+| テストの作成 | [.claude/agents/test-author.md](../../.claude/agents/test-author.md) |
+
+レビューの観点の正は [.github/copilot-instructions.md](../../.github/copilot-instructions.md) にある。
+ファイル名は Copilot 向けだが、Claude のレビュー用サブエージェントもここを読む。
+Copilot の一次レビューと基準を揃え、同じ指摘が二重に出るのを避けるため。
+観点を変えるときは、この 1 か所を直せば両方に効く。
+
+**設計と実装は分けない。** ADR は「なぜ」の記録であって実装手順書ではないため、
+分けると ADR に書かれていない細部の判断が実装側に落ち、往復が増える。
+`Logora.Abstractions` が固まった段階で再考する。
 
 ### 衝突を避ける仕組み
 
