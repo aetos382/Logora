@@ -1,5 +1,9 @@
 <Project>
   <PropertyGroup>
+    <RootNamespace Condition="'$(RootNamespace)' == ''">$(AssemblyName)</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <IsAotCompatible Condition="'$(IsAotCompatible)' == '' and $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
   </PropertyGroup>
 
