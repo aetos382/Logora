@@ -19,12 +19,14 @@ GitHub Codespaces を主開発環境とする。
 Codespace を作れば、.NET SDK・gh CLI・Claude Code CLI が入った状態で始められる。
 
 ローカルで作業する場合は .NET SDK が必要（必要なバージョンは [global.json](global.json) を参照）。
-クローン後に一度、マージ ドライバーの定義を取り込む。
+クローン後に一度、マージ ドライバーと pre-commit hook の定義を取り込む。
 
 ```sh
 git config set --append include.path ../.gitconfig
-git config set core.hooksPath .githooks
 ```
+
+pre-commit hook は Git の Config-based hooks 機能を使っており、Git 2.54 以降が必要。
+それより古い Git では `.gitconfig` の設定が黙って無視され、main への直接コミット防止が効かない。
 
 | 目的 | コマンド |
 | --- | --- |
