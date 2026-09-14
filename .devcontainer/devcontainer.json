@@ -31,9 +31,12 @@
     }
   },
 
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/.claude-home"
+  },
+
   "remoteEnv": {
-    "DOTNET_NOLOGO": "true",
-    "DOTNET_CLI_TELEMETRY_OPTOUT": "true"
+    "DOTNET_NOLOGO": "true"
   },
 
   "postCreateCommand": "bash .devcontainer/post-create.sh"
