@@ -28,4 +28,24 @@ fi
 # Claude Code CLI。認証は初回起動時に各自で行う。
 npm install -g @anthropic-ai/claude-code
 
+# ~/.claude（設定・認証・セッション メモリ）は devcontainer.json の containerEnv で
+# CLAUDE_CONFIG_DIR を /workspaces 配下に向けているため、rebuild container をまたいで
+# 自然に永続化される。~/.claude.json（認証・グローバル設定）だけは CLAUDE_CONFIG_DIR の
+# 対象外でホーム ディレクトリ直下に固定されるため、個別に同じ永続領域へのシンボリック
+# リンクに差し替える。永続側に既にファイルがある場合は、コンテナ再構築直後の初期状態で
+# 上書きしないよう、永続側を優先する no-clobber コピーにする。
+# CLAUDE_HOME_PERSIST は CLAUDE_CONFIG_DIR と同じ場所を指す必要があるため、
+# devcontainer.json 側の値をそのまま参照する（未設定時のみ既定値にフォールバック）。
+CLAUDE_HOME_PERSIST="${CLAUDE_CONFIG_DIR:-$(pwd)/.claude-home}"
+mkdir -p "$CLAUDE_HOME_PERSIST"
+
+CLAUDE_JSON_PERSIST="$CLAUDE_HOME_PERSIST/claude.json"
+if [ ! -L "$HOME/.claude.json" ]; then
+  if [ -f "$HOME/.claude.json" ]; then
+    cp -n "$HOME/.claude.json" "$CLAUDE_JSON_PERSIST"
+    rm -f "$HOME/.claude.json"
+  fi
+  ln -s "$CLAUDE_JSON_PERSIST" "$HOME/.claude.json"
+fi
+
 dotnet restore Logora.slnx
