@@ -22,7 +22,7 @@ git_version="$(git --version | awk '{print $3}')"
 min_git_version="2.54.0"
 oldest="$(printf '%s\n%s\n' "$git_version" "$min_git_version" | sort -V | head -n1)"
 if [ "$oldest" != "$min_git_version" ]; then
-  echo "警告: Git ${git_version} は Config-based hooks（Git 2.54 以降が必要）に対応していません。main への直接コミット防止が効きません。" >&2
+  echo "Warning: Git ${git_version} does not support Config-based hooks (requires Git 2.54+). The pre-commit protection against direct commits to main will not work." >&2
 fi
 
 # Claude Code CLI。認証は初回起動時に各自で行う。
