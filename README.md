@@ -23,6 +23,7 @@ Codespace を作れば、.NET SDK・gh CLI・Claude Code CLI が入った状態�
 
 ```sh
 git config set --append include.path ../.gitconfig
+git config set core.hooksPath .githooks
 ```
 
 | 目的 | コマンド |

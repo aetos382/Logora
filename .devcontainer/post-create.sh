@@ -11,6 +11,9 @@ if ! git config get --all include.path 2>/dev/null | grep -qxF '../.gitconfig'; 
   git config set --append include.path ../.gitconfig
 fi
 
+# main への直接コミットを止める pre-commit hook を有効化する。
+git config set core.hooksPath .githooks
+
 # Claude Code CLI。認証は初回起動時に各自で行う。
 npm install -g @anthropic-ai/claude-code
 
