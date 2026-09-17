@@ -4,20 +4,18 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if ! git config get --all include.path 2>/dev/null | grep -qxF '../.gitconfig'; then
-  git config set --append include.path ../.gitconfig
+# main への直接コミットを止める pre-commit hook（Config-based hooks）の定義を
+# .gitconfig から取り込む。取り込まないと hook が有効にならない。
+# 何度実行しても値が重複しないよう、既に入っているかを確認する。
+# grep へのパイプで確認すると、grep -q が先に終了して git config が SIGPIPE で落ち、
+# pipefail のせいで「未設定」と誤判定されて重複追加されることがある。git config get 自身の
+# 値フィルターで確認する。
+if ! git config get --local --all --fixed-value --value='../.gitconfig' 'include.path' >/dev/null 2>&1; then
+  git config set --append --local 'include.path' '../.gitconfig'
 fi
 
-claude plugin marketplace add 'anthropics/claude-plugins-official'
-claude plugin marketplace add 'aetos382/dotnet-skills#fix-lsp-servers-entry'
-
-claude plugin install 'commit-commands@claude-plugins-official' -y
-claude plugin install 'pr-review-toolkit@claude-plugins-official' -y
-claude plugin install 'claude-md-management@claude-plugins-official' -y
-claude plugin install 'claude-code-setup@claude-plugins-official' -y
-
-claude plugin install 'dotnet@dotnet-agent-skills' -y
-claude plugin install 'dotnet-msbuild@dotnet-agent-skills' -y
-claude plugin install 'dotnet-test@dotnet-agent-skills' -y
+# .claude/settings.json に書かれている marketplace / plugin をプロジェクト スコープで
+# インストールする。ローカル（Windows を含む）でも同じ処理を使うので、本体は PowerShell で書いてある。
+pwsh -NoProfile -File .claude/install-plugins.ps1
 
 dotnet restore Logora.slnx
