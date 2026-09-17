@@ -70,6 +70,10 @@ SDK は [global.json](global.json) で固定している（.NET 10）。テス�
 
 スクリプトは実行権限に依存しないよう `bash` 経由で呼ぶ。
 
+`.sh` と `.ps1` は CI が ShellCheck と PSScriptAnalyzer で検査する。
+`eng/*.sh` には入れていないので、手元で走らせる手段は無い。
+理由は [docs/design/process.md](docs/design/process.md) の CI 節にある。
+
 ### プロジェクトを追加したとき
 
 1. `dotnet sln add <csproj のパス>` で [Logora.slnx](Logora.slnx) に登録する。**忘れるとビルドも CI もそのプロジェクトを見ない。**

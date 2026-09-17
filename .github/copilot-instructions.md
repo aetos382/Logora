@@ -23,7 +23,7 @@
 
 ## レビューの観点
 
-上から優先順。
+レビュー コメントは日本語で書く。指摘する観点は上から優先順。
 
 1. **ADR 違反。** 特に次の 4 つ。
    - `Logora.Abstractions` への、[許可リスト](../docs/design/abstractions-dependencies.md)に無い依存の混入（[ADR-0006](../docs/design/adr/0006-abstractions-dependencies.md)）

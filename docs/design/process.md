@@ -315,11 +315,24 @@ gh ruleset check --default   # main に効いている規則だけを見る
 
 [.github/workflows/ci.yml](../../.github/workflows/ci.yml) で `main` への push と全 PR に対して実行する。
 
-- ビルドとテストの成否だけをブロック条件とする。
+- ビルドとテストの成否をブロック条件とする。
 - **警告ではビルドを落とさない。** 代わりに診断 ID ごとの件数をジョブ サマリに集計して出す。
   `AnalysisLevel` が `latest-all` のため警告は多く出る見込みで、初期からエラー扱いにすると作業が進まない。
   実コードが乗って傾向が見えた段階で、エラー扱いに切り替えるかを ADR で決める。
 - 書式の検査（`dotnet format`）は CI で強制しない。ローカルで `bash eng/format.sh` を使う。
+- **シェル スクリプトは ShellCheck、PowerShell スクリプトは PSScriptAnalyzer で検査し、指摘が出たらジョブを落とす。**
+  どちらも対象が数本しかなく、C# の警告と違って最初からエラー扱いにしても作業が止まらない。
+  ただし**必須チェックに入れるのは、初回が緑になるのを見てから**（「main の保護」の最後を参照）。
+  それまではジョブが赤でもマージは止まらない。
+  検査対象は `git ls-files` と `Get-ChildItem` で集めるので、スクリプトを足してもワークフローは変えなくてよい。
+  拾う基準は拡張子（`.sh` / `.ps1` / `.psd1` / `.psm1`）なので、当てはまらない名前を付けると黙って対象外になる。
+  どちらのジョブも、対象が 0 件なら「指摘なし」ではなく失敗として扱う。
+- **ShellCheck の版は CI と devcontainer で揃っていない。** CI はランナー イメージ同梱の版を使い、
+  devcontainer は [.devcontainer/install-shellcheck.sh](../../.devcontainer/install-shellcheck.sh) が版を固定する。
+  ランナーの更新で、スクリプトに触れていない PR に新しい指摘が出ることがある。
+- **静的解析をローカルで走らせる手段は用意していない。** ShellCheck は Windows に入らないため、
+  `eng/*.sh` に置くと「どの環境でも同じスクリプトが動く」という原則を満たせない。
+  手元で確かめたいときは devcontainer / Codespaces で `shellcheck` を直接叩く。
 - ビルド ログは artifact として残す。
 - **Actions はコミット SHA で固定する。** バージョン タグは可変で、後から別のコミットを指すよう付け替えられる余地があるため。
   `<action>@<SHA> # <タグ>` の形で書き、更新するときはコメントのタグも合わせて直す。
@@ -330,3 +343,30 @@ GitHub Codespaces を主開発環境とする。構成は [.devcontainer/devcont
 
 ローカル環境でも同じスクリプト（`eng/*.sh`）が動くことを保証する。
 環境に依存する手順をスクリプトの外に置かない。
+
+Claude Code の marketplace と plugin は [.claude/settings.json](../../.claude/settings.json) を正とし、
+[.claude/install-plugins.ps1](../../.claude/install-plugins.ps1) がそれを読んでプロジェクト スコープに入れる。
+devcontainer では post-create.sh がこれを呼び、ローカルでは手で実行する。
+インストール対象をスクリプト側に列挙しないのは、2 箇所に書くと片方だけ直して食い違うため。
+
+ShellCheck は [.devcontainer/update-content.sh](../../.devcontainer/update-content.sh) で入れる。
+`postCreateCommand` ではなく `updateContentCommand` に置くのは、Codespaces の prebuild に結果を含めるため。
+
+### dotfiles リポジトリと共有しているファイル
+
+インフラ系の設定の一部は [aetos382/dotfiles](https://github.com/aetos382/dotfiles) と同じものを使っている。
+片方で直したらもう片方にも運ぶ。Logora 側で意図的に変えているのは次の表の右列だけで、
+それ以外の差分は運び忘れだと考えてよい。
+
+| ファイル | Logora 側の差分 |
+| --- | --- |
+| `.devcontainer/install-shellcheck.sh` | なし。バイト単位で一致させる |
+| `.devcontainer/update-content.sh` | コメントの参照先を `eng/*.sh` にした |
+| `.claude/install-plugins.ps1` | `source: git`（ブランチを指す marketplace）の分岐と、キーの存在確認を足した |
+| `PSScriptAnalyzerSettings.psd1` | `PSUseBOMForUnicodeEncodedFile` を除外する理由を `.editorconfig` に紐づけた |
+| `ci.yml` の `shellcheck` / `psscriptanalyzer` ジョブ | pathspec から dotfiles 固有の `*/.bash*` を落とし、checkout の SHA を他ジョブに揃え、`psscriptanalyzer` に対象 0 件のガードを足した |
+| `.githooks/block-commit-to-main.sh` | なし |
+| `.editorconfig` / `.gitattributes` | .NET 向けの項目を Logora 側だけが持つ |
+
+VS Code の拡張機能 ID の表記は dotfiles 側との一致を優先し、Marketplace の正式表記には揃えていない。
+VS Code が大文字小文字を区別しないため、実害がないほうに合わせた。
