@@ -1,9 +1,10 @@
 * text=auto eol=lf
 
+*.cs text diff=csharp
+*.md text diff=markdown
+*.sh text diff=bash
+
 .editorconfig text diff=ini
 .globalconfig text diff=ini
-*.md text diff=markdown
-*.cs text diff=csharp
 
-**/*.lock.json linguist-generated=true merge=ours
-**/*-lock.json linguist-generated=true merge=ours
+**/*-lock.json linguist-generated=true -text

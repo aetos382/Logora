@@ -1,18 +1,36 @@
 {
   "name": "Logora",
-  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
-
+  "image": "mcr.microsoft.com/devcontainers/base:3-ubuntu26.04",
+  "init": true,
   "features": {
+    "ghcr.io/aetos382/devcontainer-features/claude-code:1": {},
+    "ghcr.io/aetos382/devcontainer-features/timezone:1": {
+      "timezone": "Asia/Tokyo"
+    },
+    "ghcr.io/aetos382/devcontainer-features/locale:1": {
+      "locale": "ja_JP"
+    },
+    "ghcr.io/aetos382/devcontainer-features/apt-mirror:1": {
+      "mirror": "https://ftp.udx.icscoe.jp/Linux/ubuntu/"
+    },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "10.0.400"
     },
     "ghcr.io/devcontainers/features/github-cli:1": {},
     "ghcr.io/devcontainers/features/node:2": {
-      "version": "lts"
+      "nodeGypDependencies": false
     },
     "ghcr.io/devcontainers/features/powershell:2": {}
   },
-
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/aetos382/devcontainer-features/apt-mirror"
+  ],
+  "remoteUser": "vscode",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "waitFor": "postCreateCommand",
+  "remoteEnv": {
+    "DOTNET_NOLOGO": "true"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
@@ -22,6 +40,7 @@
         "github.vscode-github-actions",
         "GitHub.vscode-pull-request-github",
         "ms-dotnettools.csdevkit",
+        "ms-vscode.powershell",
         "-dbaeumer.vscode-eslint"
       ],
       "settings": {
@@ -29,15 +48,5 @@
         "dotnet.defaultSolution": "Logora.slnx"
       }
     }
-  },
-
-  "containerEnv": {
-    "CLAUDE_CONFIG_DIR": "${containerWorkspaceFolder}/.claude-home"
-  },
-
-  "remoteEnv": {
-    "DOTNET_NOLOGO": "true"
-  },
-
-  "postCreateCommand": "bash .devcontainer/post-create.sh"
+  }
 }

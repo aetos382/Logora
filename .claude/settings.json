@@ -1,37 +1,13 @@
 {
   "permissions": {
-    "deny": [
-      "Bash(gh api:*)"
-    ],
     "allow": [
-      "Bash(gh issue view:*)",
-      "Bash(gh issue list:*)",
-      "Bash(gh search issues:*)",
-      "Bash(gh search prs:*)",
-      "Bash(gh pr view:*)",
-      "Bash(gh pr list:*)",
-      "Bash(gh pr diff:*)",
-      "Bash(gh pr checks:*)",
-      "Bash(gh repo view:*)",
-      "Bash(gh label list:*)",
-      "Bash(gh ruleset list:*)",
-      "Bash(gh ruleset view:*)",
-      "Bash(gh ruleset check:*)",
-      "Bash(gh run list:*)",
-      "Bash(gh run view:*)",
-      "Bash(gh release view:*)",
-      "Bash(gh auth status)",
-      "Bash(git status:*)",
-      "Bash(git diff:*)",
-      "Bash(git log:*)",
-      "Bash(git show:*)",
-      "Bash(git blame:*)",
-      "Bash(git ls-files:*)",
-      "Bash(git rev-parse:*)",
-      "Bash(bash eng/build.sh:*)",
-      "Bash(bash eng/test.sh:*)",
-      "Bash(bash eng/summarize-warnings.sh:*)",
+      "Bash(bash eng/build.sh *)",
+      "Bash(bash eng/test.sh *)",
+      "Bash(bash eng/summarize-warnings.sh *)",
       "Bash(bash eng/format.sh)"
+    ],
+    "deny": [
+      "Edit(**/*-lock.json)"
     ]
   }
 }
