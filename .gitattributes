@@ -7,4 +7,4 @@
 .editorconfig text diff=ini
 .globalconfig text diff=ini
 
-**/*-lock.json linguist-generated=true -text
+*-lock.json linguist-generated=true -text
